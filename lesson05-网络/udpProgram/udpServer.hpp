@@ -1,10 +1,10 @@
 
 #include <arpa/inet.h>
+#include <errno.h>
 #include <strings.h>
 #include <sys/socket.h>
-
-#include <errno.h>
 #include <unistd.h>
+
 #include <cstdlib>
 #include <cstring>
 #include <functional>
@@ -20,13 +20,11 @@ const string DEFAULT_IP = "0.0.0.0";
 
 #define gnum 1024
 
-typedef function<void(string, uint16_t, string)> func;
+typedef function<void(int, string, uint16_t, string)> func;
 
 class udpServer {
 public:
-    udpServer(const uint16_t& _port,
-              const func& _callback,
-              const string& _ip = DEFAULT_IP)
+    udpServer(const uint16_t& _port, const func& _callback, const string& _ip = DEFAULT_IP)
         : port(_port), ip(_ip), callback(_callback), fd(-1) {}
 
     void initServer() {
@@ -59,17 +57,15 @@ public:
             // 服务器读取数据：
             struct sockaddr_in peer;
             socklen_t len = sizeof(peer);
-            ssize_t n =
-                recvfrom(fd, buffer, gnum - 1, 0, (sockaddr*)&peer, &len);
+            ssize_t n = recvfrom(fd, buffer, gnum - 1, 0, (sockaddr*)&peer, &len);
             if (n > 0) {
                 // success:
                 string clientIp = inet_ntoa(peer.sin_addr);
                 uint16_t clientPort = ntohs(peer.sin_port);
                 buffer[n] = 0;
                 string message = buffer;
-                cout << "[" << clientIp + "-" << clientPort << "]# " << message
-                     << endl;
-                callback(clientIp, clientPort, message);
+                cout << "[" << clientIp + "-" << clientPort << "]# " << message << endl;
+                callback(fd, clientIp, clientPort, message);
             }
         }
     }

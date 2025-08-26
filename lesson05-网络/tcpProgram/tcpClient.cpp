@@ -1,11 +1,11 @@
-#include "udpClient.hpp"
+#include "tcpClient.hpp"
 
 #include <memory>
 
 using namespace Client;
 
 void Usage() {
-    std::cout << "Usage form: ./udpClient server_ip server_port" << std::endl;
+    std::cout << "Usage form: ./tcpClient server_ip server_port" << std::endl;
 }
 
 int main(int argc, char *argv[]) {
@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
     string server_ip = argv[1];
     uint16_t server_port = atoi(argv[2]);
 
-    std::unique_ptr<udpClient> cilent(new udpClient(server_ip, server_port));
+    std::unique_ptr<tcpClient> cilent(new tcpClient(server_ip, server_port));
 
     cilent->initClient();
     cilent->run();
