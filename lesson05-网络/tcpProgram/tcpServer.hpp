@@ -1,12 +1,17 @@
+#pragma once
 
 #include <arpa/inet.h>
-#include <errno.h>
-#include <strings.h>
+#include <pthread.h>
 #include <sys/socket.h>
-#include <unistd.h>
+#include <sys/types.h>
 
+#include "Task.hpp"
+#include "ThreadPool.hpp"
 #include "log.hpp"
 
+#include <errno.h>
+#include <strings.h>
+#include <unistd.h>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
@@ -16,32 +21,32 @@ namespace Server {
 
 using namespace std;
 
-enum { USAGE_ERR = 1, SOCKET_ERR, BIND_ERR, OPEN_ERR, LISTEN_ERR, ACCEPT_ERR };
+enum { USAGE_ERR = 1, SOCKET_ERR, BIND_ERR, OPEN_ERR, LISTEN_ERR, ACCEPT_ERR, FORK_ERR };
 
 typedef function<void(int, string, uint16_t, string)> func;
 
 static const int backlog = 5;
 
+class tcpServer;
+
+class tcpServerData {
+public:
+    tcpServerData(tcpServer* _server, const int _sock) : server(_server), sock(_sock) {}
+
+public:
+    tcpServer* server;
+    int sock;
+};
+
 class tcpServer {
 private:
-    void DataIO(int sock) {
-        char buffer[1024];
-        while (true) {
-            // 读
-            ssize_t n = read(sock, buffer, sizeof(buffer) - 1);
-            if (n == 0) {
-                logMessage(NORMAL, "client quit");
-                break;
-            }
-            buffer[n] = 0;
-            cout << "receive message:" << buffer << endl;
-            ;
-            string response = buffer;
-            response += "[server send]";
-            // 写
-            write(sock, response.c_str(), response.size());
-        }
-    }
+    // static void* clientThread(void* args) {
+    //     tcpServerData* serverData = static_cast<tcpServerData*>(args);
+    //     serverData->server->DataIO(serverData->sock);
+    //     delete serverData;
+    //     close(serverData->sock);
+    //     return nullptr;
+    // }
 
 public:
     tcpServer(const uint16_t& _port, const func& _callback) : port(_port), callback(_callback), listenfd(-1) {}
@@ -76,6 +81,9 @@ public:
     }
 
     void start() {
+        // v3:线程池版本
+        ThreadPool<Task>::getInstance()->run();
+
         while (true) {
             // 4. server 获取新链接
             struct sockaddr_in peer;
@@ -86,14 +94,26 @@ public:
                 logMessage(ERROR, "accept socket error!");
                 exit(ACCEPT_ERR);
             }
-            
+
+            logMessage(NORMAL, "accept socket success!");
             cout << "listenfd:" << listenfd << endl;
             cout << "sock:" << sock << endl;
-            
+
             // 5. TCP：面向字节流，文件操作
-            DataIO(sock);
+
+            // v1:基础版本
+            // DataIO(sock);
             // 要关闭已经使用过的 sock，否则会导致文件描述符泄露
-            close(sock);
+            // close(sock);
+
+            // v2：多线程版本
+            // pthread_t pid;
+            // tcpServerData* serverData = new tcpServerData(this, sock);
+            // pthread_create(&pid, nullptr, clientThread, (void*)serverData);
+            // pthread_detach(pid);
+            // 推送任务
+            Task task(sock);
+            ThreadPool<Task>::getInstance()->push(task);
         }
     }
 

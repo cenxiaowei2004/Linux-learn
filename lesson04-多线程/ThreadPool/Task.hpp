@@ -35,14 +35,13 @@ private:
 public:
     Task(int x, int y, char op, std::function<int(int, int, char)> callback)
         : _x(x), _y(y), _op(op), _callback(callback) {}
-    std::string toTaskString() const {
-        return std::to_string(_x) + " " + _op + " " + std::to_string(_y) +
-               " = ?";
-    }
+
+    std::string toTaskString() const { return std::to_string(_x) + " " + _op + " " + std::to_string(_y) + " = ?"; }
 
     void operator()() {
         int result = _callback(_x, _y, _op);
-        std::cout << "result:" + std::to_string(_x) + " " + _op + " " +
-                         std::to_string(_y) + " = " + std::to_string(result) << std::endl;
+        std::cout << "result:" + std::to_string(_x) + " " + _op + " " + std::to_string(_y) + " = " +
+                         std::to_string(result)
+                  << std::endl;
     }
 };

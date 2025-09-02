@@ -1,4 +1,5 @@
 #include "tcpServer.hpp"
+#include "daemon.hpp"
 
 #include <fstream>
 #include <memory>
