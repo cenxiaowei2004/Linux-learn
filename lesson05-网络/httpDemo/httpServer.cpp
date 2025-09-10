@@ -12,27 +12,30 @@ void Usage() {
     std::cout << "Usage form: ./calServer port" << std::endl;
 }
 
-/*
-GET /?name=zhangsan&password=123456 HTTP/1.1
-path./wwwroot/?name=zhangsan&password=123456
-
-
-*/
-
 bool callback(const HttpRequest& req, HttpResponse& resp) {
     cout << "------------------ http request start ----------------------" << endl;
     cout << req.inbuffer;
     cout << req.method << " " << req.url << " " << req.version << endl;
     cout << "path" << req.path << endl;
     cout << "------------------ http request end   ----------------------" << endl;
-    string respline = "HTTP/1.1 OK 200\r\n";
+
+    string respline = "HTTP/1.1 200 OK\r\n";
     string respblank = "\r\n";
     string body;
-
     if (!util::readFile(req.path, &body)) {
         util::readFile(not_found_path, &body);
     }
-    resp.outbuffer = respline + respblank + body;
+
+    string respheader = "Content-Length: ";
+    respheader += std::to_string(body.size());
+    respheader += "\r\n";
+    respheader += "Set-Cookie: 123456\r\n";
+    resp.outbuffer = respline + respheader + respblank + body;
+    cout << "------------------ http response start ----------------------" << endl;
+    cout << resp.outbuffer;
+    cout << "------------------ http response start ----------------------" << endl;
+
+    // HttpLib demo done!
     return true;
 }
 
