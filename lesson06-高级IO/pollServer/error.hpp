@@ -1,0 +1,3 @@
+#pragma once
+
+enum { USAGE_ERR = 1, SOCKET_ERR, BIND_ERR, OPEN_ERR, LISTEN_ERR, ACCEPT_ERR };

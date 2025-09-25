@@ -1,8 +1,8 @@
-selectServer:main.cc
-	g++ main.cc -o selectServer -std=c++11
+epollServer:main.cc
+	g++ main.cc -o epollServer -std=c++11
 # Main:moniterCin.cc
 # 	g++ moniterCin.cc -o Main
 .PHONY:clean
 clean:
-	rm -f selectServer
+	rm -f epollServer
 # 	rm -f Main
