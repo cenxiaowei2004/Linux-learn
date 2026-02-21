@@ -90,6 +90,8 @@ private:
     void Sender(connection* conn) {
         int fd = conn->sock;
         while (true) {
+            // logMessage(NORMAL, "result:%s", conn->outbuffer);
+            // cout << conn->outbuffer << endl;
             ssize_t n = send(fd, conn->outbuffer.c_str(), conn->outbuffer.size(), 0);
             if (n > 0) {
                 if (conn->outbuffer.empty()) {
