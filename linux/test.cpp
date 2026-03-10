@@ -192,6 +192,9 @@ void TestCv() {
 // 为了保证互斥，Linux提供了互斥锁mutex
 // 为了保证同步，提供了pthread_cond，与互斥量一起使用
 // 条件变量是用来描述某种资源是否就绪的一种数据化描述
+
+#include "client.hpp"
+
 int main(int argc, char* argv[]) {
     // TestPipe();
     // TestThread();
@@ -201,5 +204,7 @@ int main(int argc, char* argv[]) {
 
     // select/poll/epoll:
     // ...
+    client c;
+    c.Run();
     return 0;
 }
